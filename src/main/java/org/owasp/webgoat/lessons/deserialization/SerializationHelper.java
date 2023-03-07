@@ -16,6 +16,7 @@ public class SerializationHelper {
   public static Object fromString(String s) throws IOException, ClassNotFoundException {
     byte[] data = Base64.getDecoder().decode(s);
     ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
+    ObjectInputFilters.enableObjectFilterIfUnprotected(ois);
     Object o = ois.readObject();
     ois.close();
     return o;
