@@ -1,5 +1,6 @@
 package org.owasp.webgoat.lessons.pathtraversal;
 
+import io.openpixee.security.Filenames;
 import static org.springframework.http.MediaType.ALL_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -33,6 +34,6 @@ public class ProfileUploadRemoveUserInput extends ProfileUploadBase {
   @ResponseBody
   public AttackResult uploadFileHandler(
       @RequestParam("uploadedFileRemoveUserInput") MultipartFile file) {
-    return super.execute(file, file.getOriginalFilename());
+    return super.execute(file, Filenames.toSimpleFileName(file.getOriginalFilename()));
   }
 }
