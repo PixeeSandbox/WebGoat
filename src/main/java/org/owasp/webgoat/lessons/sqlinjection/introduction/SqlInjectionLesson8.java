@@ -21,6 +21,7 @@
  */
 
 package org.owasp.webgoat.lessons.sqlinjection.introduction;
+import java.sql.PreparedStatement;
 
 import static java.sql.ResultSet.CONCUR_UPDATABLE;
 import static java.sql.ResultSet.TYPE_SCROLL_SENSITIVE;
@@ -148,14 +149,15 @@ public class SqlInjectionLesson8 extends AssignmentEndpoint {
     action = action.replace('\'', '"');
     Calendar cal = Calendar.getInstance();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    String time = sdf.format(cal.getTime());
 
     String logQuery =
-        "INSERT INTO access_log (time, action) VALUES ('" + time + "', '" + action + "')";
+        "INSERT INTO access_log (time, action) VALUES (?, ?)";
 
     try {
-      Statement statement = connection.createStatement(TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE);
-      statement.executeUpdate(logQuery);
+      PreparedStatement statement = connection.prepareStatement(logQuery);
+      statement.setString(1, sdf.format(cal.getTime()));
+      statement.setString(2, action);
+      statement.executeUpdate();
     } catch (SQLException e) {
       System.err.println(e.getMessage());
     }
