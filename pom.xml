@@ -60,17 +60,17 @@
     <developer>
       <id>jwayman</id>
       <name>Jeff Wayman</name>
-      <email></email>
+      <email/>
     </developer>
     <developer>
       <id>dcowden</id>
       <name>Dave Cowden</name>
-      <email></email>
+      <email/>
     </developer>
     <developer>
       <id>lawson89</id>
       <name>Richard Lawson</name>
-      <email></email>
+      <email/>
     </developer>
     <developer>
       <id>dougmorato</id>
@@ -146,6 +146,7 @@
     <xstream.version>1.4.5</xstream.version>
     <!-- do not update necessary for lesson -->
     <zxcvbn.version>1.5.2</zxcvbn.version>
+    <versions.java-security-toolkit>1.0.0</versions.java-security-toolkit>
   </properties>
 
   <dependencyManagement>
@@ -247,6 +248,11 @@
         <groupId>org.jruby</groupId>
         <artifactId>jruby</artifactId>
         <version>9.3.6.0</version>
+      </dependency>
+      <dependency>
+        <groupId>io.openpixee</groupId>
+        <artifactId>java-security-toolkit</artifactId>
+        <version>${versions.java-security-toolkit}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -393,6 +399,10 @@
       <artifactId>rest-assured</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>io.openpixee</groupId>
+      <artifactId>java-security-toolkit</artifactId>
+    </dependency>
   </dependencies>
 
   <repositories>
@@ -521,8 +531,8 @@
               <includes>
                 <include>.gitignore</include>
               </includes>
-              <trimTrailingWhitespace></trimTrailingWhitespace>
-              <endWithNewline></endWithNewline>
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
               <indent>
                 <tabs>true</tabs>
                 <spacesPerTab>4</spacesPerTab>
@@ -533,10 +543,10 @@
             <includes>
               <include>**/*.md</include>
             </includes>
-            <flexmark></flexmark>
+            <flexmark/>
           </markdown>
           <java>
-            <removeUnusedImports></removeUnusedImports>
+            <removeUnusedImports/>
             <googleJavaFormat>
               <style>GOOGLE</style>
               <reflowLongStrings>true</reflowLongStrings>
