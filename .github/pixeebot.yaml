@@ -1,3 +1,4 @@
 ai:
   allow_llm_access: true
-issues_dashboard: true
+activity_dashboard: true
+
