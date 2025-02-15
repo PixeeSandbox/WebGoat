@@ -22,6 +22,7 @@
 
 package org.owasp.webgoat.lessons.sqlinjection.introduction;
 
+import java.sql.PreparedStatement;
 import static java.sql.ResultSet.CONCUR_UPDATABLE;
 import static java.sql.ResultSet.TYPE_SCROLL_SENSITIVE;
 
@@ -63,20 +64,18 @@ public class SqlInjectionLesson8 extends AssignmentEndpoint {
   protected AttackResult injectableQueryConfidentiality(String name, String auth_tan) {
     StringBuilder output = new StringBuilder();
     String query =
-        "SELECT * FROM employees WHERE last_name = '"
-            + name
-            + "' AND auth_tan = '"
-            + auth_tan
-            + "'";
+        "SELECT * FROM employees WHERE last_name = ? AND auth_tan = ?";
 
     try (Connection connection = dataSource.getConnection()) {
       try {
-        Statement statement =
-            connection.createStatement(
-                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+        PreparedStatement statement =
+            connection.prepareStatement(
+            query,     ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
         log(connection, query);
-        ResultSet results = statement.executeQuery(query);
+        statement.setString(1, name);
 
+        statement.setString(2, auth_tan);
+        ResultSet results = statement.execute();
         if (results.getStatement() != null) {
           if (results.first()) {
             output.append(generateTable(results));
@@ -148,14 +147,15 @@ public class SqlInjectionLesson8 extends AssignmentEndpoint {
     action = action.replace('\'', '"');
     Calendar cal = Calendar.getInstance();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    String time = sdf.format(cal.getTime());
 
     String logQuery =
-        "INSERT INTO access_log (time, action) VALUES ('" + time + "', '" + action + "')";
+        "INSERT INTO access_log (time, action) VALUES (?, ?)";
 
     try {
-      Statement statement = connection.createStatement(TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE);
-      statement.executeUpdate(logQuery);
+      PreparedStatement statement = connection.prepareStatement(logQuery, TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE);
+      statement.setString(1, sdf.format(cal.getTime()));
+      statement.setString(2, action);
+      statement.execute();
     } catch (SQLException e) {
       System.err.println(e.getMessage());
     }
