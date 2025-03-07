@@ -56,7 +56,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .authenticated()
             .anyRequest()
             .permitAll();
-    security.and().csrf().disable().formLogin().loginPage("/login").failureUrl("/login?error=true");
+    security.and().csrf().formLogin().loginPage("/login").failureUrl("/login?error=true");
     security.and().formLogin().loginPage("/login").defaultSuccessUrl("/home", true).permitAll();
     security.and().logout().permitAll();
   }
