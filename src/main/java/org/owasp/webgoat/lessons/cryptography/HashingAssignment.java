@@ -24,6 +24,7 @@ package org.owasp.webgoat.lessons.cryptography;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Random;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.DatatypeConverter;
@@ -68,7 +69,7 @@ public class HashingAssignment extends AssignmentEndpoint {
 
     String sha256 = (String) request.getSession().getAttribute("sha256");
     if (sha256 == null) {
-      String secret = SECRETS[new Random().nextInt(SECRETS.length)];
+      String secret = SECRETS[new SecureRandom().nextInt(SECRETS.length)];
       sha256 = getHash(secret, "SHA-256");
       request.getSession().setAttribute("sha256Hash", sha256);
       request.getSession().setAttribute("sha256Secret", secret);
