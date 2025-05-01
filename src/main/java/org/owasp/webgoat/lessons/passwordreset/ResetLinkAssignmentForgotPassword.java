@@ -19,7 +19,7 @@
  *
  * Source for this application is maintained at https://github.com/WebGoat/WebGoat, a repository for free software projects.
  */
-
+ 
 package org.owasp.webgoat.lessons.passwordreset;
 
 import java.util.UUID;
@@ -35,6 +35,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Part of the password reset assignment. Used to send the e-mail.
@@ -49,6 +51,7 @@ public class ResetLinkAssignmentForgotPassword extends AssignmentEndpoint {
   private String webWolfHost;
   private String webWolfPort;
   private final String webWolfMailURL;
+  private static final List<String> ALLOWED_HOSTS = Arrays.asList("allowed-domain.com", "192.168.1.1");
 
   public ResetLinkAssignmentForgotPassword(
       RestTemplate restTemplate,
@@ -70,7 +73,8 @@ public class ResetLinkAssignmentForgotPassword extends AssignmentEndpoint {
     String host = request.getHeader("host");
     if (ResetLinkAssignment.TOM_EMAIL.equals(email)
         && (host.contains(webWolfPort)
-            || host.contains(webWolfHost))) { // User indeed changed the host header.
+            || host.contains(webWolfHost))
+        && ALLOWED_HOSTS.contains(host)) { // User indeed changed the host header.
       ResetLinkAssignment.userToTomResetLink.put(getWebSession().getUserName(), resetLink);
       fakeClickingLinkEmail(host, resetLink);
     } else {
@@ -98,6 +102,9 @@ public class ResetLinkAssignmentForgotPassword extends AssignmentEndpoint {
   }
 
   private void fakeClickingLinkEmail(String host, String resetLink) {
+    if (!ALLOWED_HOSTS.contains(host)) {
+      throw new IllegalArgumentException("Invalid host");
+    }
     try {
       HttpHeaders httpHeaders = new HttpHeaders();
       HttpEntity httpEntity = new HttpEntity(httpHeaders);
