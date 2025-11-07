@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Base64;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -88,8 +90,11 @@ public class ProfileUploadRetrieval extends AssignmentEndpoint {
     }
     try {
       var id = request.getParameter("id");
-      var catPicture =
-          new File(catPicturesDirectory, (id == null ? RandomUtils.nextInt(1, 11) : id) + ".jpg");
+      Path normalizedPath = Paths.get(catPicturesDirectory.getAbsolutePath(), (id == null ? RandomUtils.nextInt(1, 11) : id) + ".jpg").normalize();
+      if (!normalizedPath.startsWith(catPicturesDirectory.getAbsolutePath())) {
+        return ResponseEntity.badRequest().body("Invalid file path");
+      }
+      var catPicture = normalizedPath.toFile();
 
       if (catPicture.getName().toLowerCase().contains("path-traversal-secret.jpg")) {
         return ResponseEntity.ok()
