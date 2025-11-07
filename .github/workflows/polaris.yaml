@@ -1,0 +1,113 @@
+name: CI-Polaris
+on:
+  push:
+    branches: [main, master, develop, stage, release]
+  pull_request:
+    branches: [main, master, develop, stage, release]
+  workflow_dispatch:
+jobs:
+  polaris-scan:
+    runs-on: [ubuntu-latest]
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@v4
+    - name: Set up JDK
+      uses: ./.github/actions/java-setup
+      with:
+        cache: 'maven'
+    - name: Polaris Full Scan
+      id: polaris-full-scan
+      if: ${{ github.event_name != 'pull_request' }}
+      uses: blackduck-inc/black-duck-security-scan@v2
+      with:
+        polaris_server_url: ${{ vars.POLARIS_SERVER_URL }}
+        polaris_access_token: ${{ secrets.POLARIS_ACCESS_TOKEN }}
+        polaris_application_name: ${{ github.event.repository.name }}
+        polaris_project_name: ${{ github.event.repository.name }}
+        polaris_assessment_types: "SCA,SAST"
+        # polaris_waitForScan: false  # Used to support the async mode
+        # project_directory: ${{ vars.PROJECT_DIRECTORY }}
+
+        ### Uncomment below configuration if Bridge diagnostic files needs to be uploaded
+        include_diagnostics: true
+
+        ### SARIF report generation and upload to GitHub Adavanced Security Tab: Uncomment below to enable
+        # polaris_reports_sarif_create: true
+        # polaris_reports_sarif_file_path: '/Users/tmp/report.sarif.json' # File path (including file name) where SARIF report is created.
+        # polaris_reports_sarif_severities: "CRITICAL,HIGH"
+        # polaris_reports_sarif_groupSCAIssues: true
+        # polaris_reports_sarif_issue_types: 'SCA, SAST'
+        # polaris_upload_sarif_report: true
+        # github_token: ${{ secrets.GITHUB_TOKEN }} # Required when polaris_upload_sarif_report is set as true
+
+        ### Mark build status if policy violating issues are found
+        # mark_build_status: 'success'
+
+        ### Signature scan
+        # polaris_test_sca_type: "SCA-SIGNATURE"
+
+        ### Uncomment this to use Source Upload method. Default value is hybrid (build based)
+        # polaris_test_sast_location: "remote"
+        # polaris_test_sca_location: "remote"
+        # project_source_archive: ${{ vars.PROJECT_SOURCE_ARCHIVE }}
+        # project_source_excludes: ${{ vars.PROJECT_SOURCE_EXCLUDES }} # Accepts Multiple Values
+        # project_source_preserveSymLinks: true
+
+        #### Uncomment this to use Local Analysis feature
+        # Please use Local Analysis or Source Upload exclusively
+        # polaris_test_sast_location: 'local'
+
+        ### Uncomment below to add arbitrary CL parameters
+        # detect_search_depth: 2
+        # detect_args: '--detect.diagnostic=true'
+        # detect_config_path: '/Users/Config/application.properties'
+        coverity_build_command: mvn -B clean install -DskipTests
+        coverity_clean_command: mvn -B clean
+        # coverity_config_path: /Users/Config/coverity.yml
+        # coverity_args: --config-override capture.build.build-command=mvn install
+
+
+    - name: Polaris PR Scan
+      id: polaris-pr-scan
+      if: ${{ github.event_name == 'pull_request' }}
+      uses: blackduck-inc/black-duck-security-scan@v2
+      with:
+        polaris_server_url: ${{ vars.POLARIS_SERVER_URL }}
+        polaris_access_token: ${{ secrets.POLARIS_ACCESS_TOKEN }}
+        polaris_application_name: ${{ github.event.repository.name }}
+        polaris_project_name: ${{ github.event.repository.name }}
+        polaris_assessment_types: "SCA,SAST"
+        # project_directory: ${{ vars.PROJECT_DIRECTORY }}
+
+        ### Uncomment this to use Source Upload method. Default value is hybrid (build based)
+        # polaris_test_sast_location: "remote"
+        # polaris_test_sca_location: "remote"
+        # project_source_archive: ${{ vars.PROJECT_SOURCE_ARCHIVE }}
+        # project_source_excludes: ${{ vars.PROJECT_SOURCE_EXCLUDES }} # Accepts Multiple Values
+        # project_source_preserveSymLinks: true
+
+        #### Uncomment this to use Local Analysis feature
+        # Please use Local Analysis or Source Upload exclusively
+        # polaris_test_sast_location: 'local'
+
+        ### Build commands for SAST analysis
+        coverity_build_command: mvn -B clean install -DskipTests
+        coverity_clean_command: mvn -B clean
+
+        ### Below configuration is used to enable feedback from Polaris security testing as pull request comment
+        polaris_prComment_enabled: true
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        # Mandatory when polaris_prComment_enabled is set to 'true'
+
+        ### Mark build status if policy violating issues are found
+        # mark_build_status: 'success'
+
+        ### Uncomment below configuration if Bridge diagnostic files needs to be uploaded
+        include_diagnostics: true
+
+        ### Uncomment below configuration to add custom logic based on return status
+        # - name: cmdLine
+        #   id: cmdLine
+        #   run: |
+        #     EXIT_CODE=${{ steps.polaris-full-scan.outputs.status }}
+        #     echo "Polarity Full Scan exit status - $EXIT_CODE"
