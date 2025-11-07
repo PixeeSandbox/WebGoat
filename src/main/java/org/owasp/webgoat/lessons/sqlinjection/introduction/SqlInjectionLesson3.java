@@ -37,6 +37,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 @RestController
 @AssignmentHints(value = {"SqlStringInjectionHint3-1", "SqlStringInjectionHint3-2"})
@@ -50,7 +52,16 @@ public class SqlInjectionLesson3 extends AssignmentEndpoint {
 
   @PostMapping("/SqlInjection/attack3")
   @ResponseBody
-  public AttackResult completed(@RequestParam String query) {
+  public AttackResult completed(@RequestParam String query, HttpServletRequest request) {
+    String tokenReceived = request.getParameter("csrfToken");
+    HttpSession session = request.getSession(false);
+    if (session == null) {
+        return new AttackResult(false, "Session is not available");
+    }
+    String tokenStored = (String) session.getAttribute("csrfToken");
+    if (tokenStored == null || !tokenStored.equals(tokenReceived)) {
+        return new AttackResult(false, "Invalid CSRF token");
+    }
     return injectableQuery(query);
   }
 
