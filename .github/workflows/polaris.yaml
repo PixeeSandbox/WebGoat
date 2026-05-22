@@ -122,9 +122,10 @@ jobs:
       env:
         POLARIS_API_TOKEN: ${{ secrets.POLARIS_ACCESS_TOKEN }}
         PIXEE_API_KEY: ${{ secrets.PIXEE_API_KEY }}
+        SCRIPTS_PAT: ${{ secrets.PIXEE_SCRIPTS_PAT }}
       run: |
         BRANCH="${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}"
-        uvx --from "git+https://github.com/pixee/blackduck-polaris-scripts.git@main" polaris-to-sarif \
+        uvx --from "git+https://x-access-token:${SCRIPTS_PAT}@github.com/pixee/blackduck-polaris-scripts.git@main" polaris-to-sarif \
           --project-id "${{ vars.POLARIS_PROJECT_ID }}" \
           --portfolio-id "${{ vars.POLARIS_PORTFOLIO_ID }}" \
           --polaris-api-token "$POLARIS_API_TOKEN" \
