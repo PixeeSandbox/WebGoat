@@ -113,3 +113,24 @@ jobs:
         #   run: |
         #     EXIT_CODE=${{ steps.polaris-full-scan.outputs.status }}
         #     echo "Polarity Full Scan exit status - $EXIT_CODE"
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+
+    - name: Upload Polaris results to Pixee
+      if: success()
+      env:
+        POLARIS_API_TOKEN: ${{ secrets.POLARIS_ACCESS_TOKEN }}
+        PIXEE_API_KEY: ${{ secrets.PIXEE_API_KEY }}
+      run: |
+        BRANCH="${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}"
+        uvx --from "git+https://github.com/pixee/blackduck-polaris-scripts.git@main" polaris-to-sarif \
+          --project-id "${{ vars.POLARIS_PROJECT_ID }}" \
+          --portfolio-id "${{ vars.POLARIS_PORTFOLIO_ID }}" \
+          --polaris-api-token "$POLARIS_API_TOKEN" \
+          --polaris-branch-name "$BRANCH" \
+          --pixee-api-key "$PIXEE_API_KEY" \
+          --pixee-repository-id "${{ vars.PIXEE_REPOSITORY_ID }}" \
+          --pixee-base-url "https://edge.getpixee.com" \
+          --pixee-branch-name "$BRANCH" \
+          --trigger-analysis
